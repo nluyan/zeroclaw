@@ -108,6 +108,7 @@ Nếu `[channels_config.matrix]` có mặt nhưng binary được build mà khô
 | Lark/Feishu | websocket (mặc định) hoặc webhook | Chỉ ở chế độ Webhook |
 | DingTalk | stream mode | Không |
 | QQ | bot gateway | Không |
+| ClawMax | websocket | Kh?ng |
 | iMessage | tích hợp cục bộ | Không |
 
 ---
@@ -125,7 +126,7 @@ Tên trường khác nhau theo channel:
 - `allowed_users` (Telegram/Discord/Slack/Mattermost/Matrix/IRC/Lark/DingTalk/QQ)
 - `allowed_from` (Signal)
 - `allowed_numbers` (WhatsApp)
-- `allowed_senders` (Email)
+- `allowed_senders` (Email/ClawMax)
 - `allowed_contacts` (iMessage)
 
 ---
@@ -342,6 +343,57 @@ allowed_users = ["*"]
 [channels_config.imessage]
 allowed_contacts = ["*"]
 ```
+
+### 4.15 ClawMax (WebSocket)
+
+```toml
+[channels_config.clawmax]
+ws_url = "ws://127.0.0.1:9000/ws"
+allowed_senders = ["*"]
+```
+
+Tin nh?n v?o (server ? ZeroClaw):
+
+```json
+{
+  "type": "message",
+  "direction": "in",
+  "message": {
+    "id": "msg-1",
+    "sender": "zeroclaw_user",
+    "reply_target": "zeroclaw_user",
+    "content": "hello",
+    "timestamp": 1700000000,
+    "channel": "clawmax",
+    "thread_ts": null
+  }
+}
+```
+
+Tin nh?n ra (ZeroClaw ? server):
+
+```json
+{
+  "type": "message",
+  "direction": "out",
+  "message": {
+    "id": "clawmax_out_<uuid>",
+    "channel": "clawmax",
+    "timestamp": 1700000000,
+    "content": "hello back",
+    "recipient": "zeroclaw_user",
+    "subject": null,
+    "thread_ts": null
+  }
+}
+```
+
+L?u ?:
+
+- `allowed_senders` r?ng s? ch?n t?t c? tin nh?n v?o; d?ng `"*"` ?? cho ph?p t?t c?.
+- N?u thi?u `reply_target`, ZeroClaw s? d?ng `sender`.
+- N?u thi?u `timestamp` ho?c `id`, ZeroClaw s? t? ?i?n.
+- Heartbeat t?y ch?n: g?i `{ "type": "ping" }`, ZeroClaw tr? `{ "type": "pong" }`.
 
 ---
 

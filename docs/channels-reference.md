@@ -117,6 +117,7 @@ If `[channels_config.matrix]`, `[channels_config.lark]`, or `[channels_config.fe
 | Feishu | websocket (default) or webhook | Webhook mode only |
 | DingTalk | stream mode | No |
 | QQ | bot gateway | No |
+| ClawMax | websocket | No |
 | Linq | webhook (`/linq`) | Yes (public HTTPS callback) |
 | iMessage | local integration | No |
 | Nostr | relay websocket (NIP-04 / NIP-17) | No |
@@ -136,7 +137,7 @@ Field names differ by channel:
 - `allowed_users` (Telegram/Discord/Slack/Mattermost/Matrix/IRC/Lark/Feishu/DingTalk/QQ/Nextcloud Talk)
 - `allowed_from` (Signal)
 - `allowed_numbers` (WhatsApp)
-- `allowed_senders` (Email/Linq)
+- `allowed_senders` (Email/Linq/ClawMax)
 - `allowed_contacts` (iMessage)
 - `allowed_pubkeys` (Nostr)
 
@@ -426,6 +427,57 @@ Notes:
 [channels_config.imessage]
 allowed_contacts = ["*"]
 ```
+
+### 4.18 ClawMax (WebSocket)
+
+```toml
+[channels_config.clawmax]
+ws_url = "ws://127.0.0.1:9000/ws"
+allowed_senders = ["*"]
+```
+
+Inbound message (server → ZeroClaw):
+
+```json
+{
+  "type": "message",
+  "direction": "in",
+  "message": {
+    "id": "msg-1",
+    "sender": "zeroclaw_user",
+    "reply_target": "zeroclaw_user",
+    "content": "hello",
+    "timestamp": 1700000000,
+    "channel": "clawmax",
+    "thread_ts": null
+  }
+}
+```
+
+Outbound message (ZeroClaw → server):
+
+```json
+{
+  "type": "message",
+  "direction": "out",
+  "message": {
+    "id": "clawmax_out_<uuid>",
+    "channel": "clawmax",
+    "timestamp": 1700000000,
+    "content": "hello back",
+    "recipient": "zeroclaw_user",
+    "subject": null,
+    "thread_ts": null
+  }
+}
+```
+
+Notes:
+
+- `allowed_senders` empty denies all inbound messages; use `"*"` to allow all.
+- If `reply_target` is omitted, `sender` is used.
+- If `timestamp` or `id` is omitted, ZeroClaw fills them.
+- Optional heartbeat: send `{ "type": "ping" }` and ZeroClaw replies `{ "type": "pong" }`.
 
 ---
 

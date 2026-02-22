@@ -390,6 +390,7 @@ Ví dụ:
 
 - `[channels_config.telegram]`
 - `[channels_config.discord]`
+- `[channels_config.clawmax]`
 - `[channels_config.whatsapp]`
 - `[channels_config.email]`
 
@@ -406,6 +407,17 @@ Lưu ý:
 - Khi `zeroclaw channel start` đang chạy, thay đổi `default_provider`, `default_model`, `default_temperature`, `api_key`, `api_url` và `reliability.*` được áp dụng nóng từ `config.toml` ở tin nhắn tiếp theo.
 
 Xem ma trận kênh và hành vi allowlist chi tiết tại [channels-reference.md](channels-reference.md).
+
+### `[channels_config.clawmax]`
+
+| Kh?a | M?c ??nh | M?c ??ch |
+|---|---|---|
+| `ws_url` | _b?t bu?c_ | URL WebSocket (`ws://` ho?c `wss://`) |
+| `allowed_senders` | `[]` (t? ch?i t?t c?) | Allowlist ng??i g?i (`"*"` = cho ph?p t?t c?) |
+
+L?u ?:
+
+- ??nh d?ng JSON g?i tin v?o/ra xem ? [channels-reference.md](channels-reference.md).
 
 ### `[channels_config.whatsapp]`
 

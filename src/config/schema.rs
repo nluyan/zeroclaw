@@ -2459,6 +2459,8 @@ pub struct ChannelsConfig {
     /// QQ Official Bot channel configuration.
     pub qq: Option<QQConfig>,
     pub nostr: Option<NostrConfig>,
+    /// ClawMax WebSocket channel configuration.
+    pub clawmax: Option<crate::channels::clawmax::ClawMaxConfig>,
     /// ClawdTalk voice channel configuration.
     pub clawdtalk: Option<crate::channels::clawdtalk::ClawdTalkConfig>,
     /// Base timeout in seconds for processing a single channel message (LLM + tools).
@@ -2544,6 +2546,10 @@ impl ChannelsConfig {
                 self.nostr.is_some(),
             ),
             (
+                Box::new(ConfigWrapper::new(&self.clawmax)),
+                self.clawmax.is_some(),
+            ),
+            (
                 Box::new(ConfigWrapper::new(&self.clawdtalk)),
                 self.clawdtalk.is_some(),
             ),
@@ -2586,6 +2592,7 @@ impl Default for ChannelsConfig {
             dingtalk: None,
             qq: None,
             nostr: None,
+            clawmax: None,
             clawdtalk: None,
             message_timeout_secs: default_channel_message_timeout_secs(),
         }
@@ -4712,6 +4719,7 @@ default_temperature = 0.7
                 dingtalk: None,
                 qq: None,
                 nostr: None,
+                clawmax: None,
                 clawdtalk: None,
                 message_timeout_secs: 300,
             },
@@ -5266,6 +5274,7 @@ allowed_users = ["@ops:matrix.org"]
             dingtalk: None,
             qq: None,
             nostr: None,
+            clawmax: None,
             clawdtalk: None,
             message_timeout_secs: 300,
         };
@@ -5479,6 +5488,7 @@ channel_id = "C123"
             dingtalk: None,
             qq: None,
             nostr: None,
+            clawmax: None,
             clawdtalk: None,
             message_timeout_secs: 300,
         };

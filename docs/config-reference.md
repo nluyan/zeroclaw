@@ -473,6 +473,7 @@ Examples:
 
 - `[channels_config.telegram]`
 - `[channels_config.discord]`
+- `[channels_config.clawmax]`
 - `[channels_config.whatsapp]`
 - `[channels_config.linq]`
 - `[channels_config.nextcloud_talk]`
@@ -490,6 +491,17 @@ Notes:
 - Telegram-only interruption behavior is controlled with `channels_config.telegram.interrupt_on_new_message` (default `false`).
   When enabled, a newer message from the same sender in the same chat cancels the in-flight request and preserves interrupted user context.
 - While `zeroclaw channel start` is running, updates to `default_provider`, `default_model`, `default_temperature`, `api_key`, `api_url`, and `reliability.*` are hot-applied from `config.toml` on the next inbound message.
+
+### `[channels_config.clawmax]`
+
+| Key | Default | Purpose |
+|---|---|---|
+| `ws_url` | _required_ | WebSocket server URL (`ws://` or `wss://`) |
+| `allowed_senders` | `[]` (deny all) | Sender allowlist (`"*"` = allow all) |
+
+Notes:
+
+- Inbound/outbound JSON packet format is documented in [channels-reference.md](channels-reference.md).
 
 ### `[channels_config.nostr]`
 
