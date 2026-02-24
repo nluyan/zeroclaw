@@ -15,7 +15,7 @@
 //! [`start_channels`]. See `AGENTS.md` §7.2 for the full change playbook.
 
 pub mod clawdtalk;
-pub mod clawmax;
+pub mod botmax;
 pub mod cli;
 pub mod dingtalk;
 pub mod discord;
@@ -43,7 +43,7 @@ pub mod whatsapp_storage;
 pub mod whatsapp_web;
 
 pub use clawdtalk::{ClawdTalkChannel, ClawdTalkConfig};
-pub use clawmax::{ClawMaxChannel, ClawMaxConfig};
+pub use botmax::{BotMaxChannel, BotMaxConfig};
 pub use cli::CliChannel;
 pub use dingtalk::DingTalkChannel;
 pub use discord::DiscordChannel;
@@ -2912,10 +2912,10 @@ fn collect_configured_channels(
         });
     }
 
-    if let Some(ref cm) = config.channels_config.clawmax {
+    if let Some(ref cm) = config.channels_config.botmax {
         channels.push(ConfiguredChannel {
-            display_name: "ClawMax",
-            channel: Arc::new(ClawMaxChannel::new(cm.clone())),
+            display_name: "BotMax",
+            channel: Arc::new(BotMaxChannel::new(cm.clone())),
         });
     }
 

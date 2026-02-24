@@ -473,7 +473,7 @@ Examples:
 
 - `[channels_config.telegram]`
 - `[channels_config.discord]`
-- `[channels_config.clawmax]`
+- `[channels_config.botmax]`
 - `[channels_config.whatsapp]`
 - `[channels_config.linq]`
 - `[channels_config.nextcloud_talk]`
@@ -492,7 +492,7 @@ Notes:
   When enabled, a newer message from the same sender in the same chat cancels the in-flight request and preserves interrupted user context.
 - While `zeroclaw channel start` is running, updates to `default_provider`, `default_model`, `default_temperature`, `api_key`, `api_url`, and `reliability.*` are hot-applied from `config.toml` on the next inbound message.
 
-### `[channels_config.clawmax]`
+### `[channels_config.botmax]`
 
 | Key | Default | Purpose |
 |---|---|---|

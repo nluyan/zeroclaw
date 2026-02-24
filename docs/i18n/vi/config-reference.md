@@ -390,7 +390,7 @@ Ví dụ:
 
 - `[channels_config.telegram]`
 - `[channels_config.discord]`
-- `[channels_config.clawmax]`
+- `[channels_config.botmax]`
 - `[channels_config.whatsapp]`
 - `[channels_config.email]`
 
@@ -408,7 +408,7 @@ Lưu ý:
 
 Xem ma trận kênh và hành vi allowlist chi tiết tại [channels-reference.md](channels-reference.md).
 
-### `[channels_config.clawmax]`
+### `[channels_config.botmax]`
 
 | Kh?a | M?c ??nh | M?c ??ch |
 |---|---|---|

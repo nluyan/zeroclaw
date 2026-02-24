@@ -108,7 +108,7 @@ Nếu `[channels_config.matrix]` có mặt nhưng binary được build mà khô
 | Lark/Feishu | websocket (mặc định) hoặc webhook | Chỉ ở chế độ Webhook |
 | DingTalk | stream mode | Không |
 | QQ | bot gateway | Không |
-| ClawMax | websocket | Kh?ng |
+| BotMax | websocket | Kh?ng |
 | iMessage | tích hợp cục bộ | Không |
 
 ---
@@ -126,7 +126,7 @@ Tên trường khác nhau theo channel:
 - `allowed_users` (Telegram/Discord/Slack/Mattermost/Matrix/IRC/Lark/DingTalk/QQ)
 - `allowed_from` (Signal)
 - `allowed_numbers` (WhatsApp)
-- `allowed_senders` (Email/ClawMax)
+- `allowed_senders` (Email/BotMax)
 - `allowed_contacts` (iMessage)
 
 ---
@@ -344,10 +344,10 @@ allowed_users = ["*"]
 allowed_contacts = ["*"]
 ```
 
-### 4.15 ClawMax (WebSocket)
+### 4.15 BotMax (WebSocket)
 
 ```toml
-[channels_config.clawmax]
+[channels_config.botmax]
 ws_url = "ws://127.0.0.1:9000/ws"
 allowed_senders = ["*"]
 ```
@@ -364,7 +364,7 @@ Tin nh?n v?o (server ? ZeroClaw):
     "reply_target": "zeroclaw_user",
     "content": "hello",
     "timestamp": 1700000000,
-    "channel": "clawmax",
+    "channel": "botmax",
     "thread_ts": null
   }
 }
@@ -377,8 +377,8 @@ Tin nh?n ra (ZeroClaw ? server):
   "type": "message",
   "direction": "out",
   "message": {
-    "id": "clawmax_out_<uuid>",
-    "channel": "clawmax",
+    "id": "botmax_out_<uuid>",
+    "channel": "botmax",
     "timestamp": 1700000000,
     "content": "hello back",
     "recipient": "zeroclaw_user",

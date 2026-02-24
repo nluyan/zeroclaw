@@ -1,4 +1,4 @@
-//! ClawMax channel - WebSocket JSON transport.
+//! BotMax channel - WebSocket JSON transport.
 //!
 //! This channel connects to a user-provided WebSocket endpoint and exchanges
 //! JSON messages that mirror ZeroClaw's internal channel message structure.
@@ -16,9 +16,9 @@ use uuid::Uuid;
 
 use std::time::{SystemTime, UNIX_EPOCH};
 
-/// ClawMax channel configuration.
+/// BotMax channel configuration.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-pub struct ClawMaxConfig {
+pub struct BotMaxConfig {
     /// WebSocket server URL (ws:// or wss://).
     pub ws_url: String,
     /// Allowed sender IDs. Empty = deny all. "*" = allow all.
@@ -26,16 +26,16 @@ pub struct ClawMaxConfig {
     pub allowed_senders: Vec<String>,
 }
 
-impl ChannelConfig for ClawMaxConfig {
+impl ChannelConfig for BotMaxConfig {
     fn name() -> &'static str {
-        "ClawMax"
+        "BotMax"
     }
     fn desc() -> &'static str {
         "WebSocket JSON channel"
     }
 }
 
-pub struct ClawMaxChannel {
+pub struct BotMaxChannel {
     ws_url: String,
     allowed_senders: Vec<String>,
     allow_all: bool,
@@ -65,8 +65,8 @@ struct OutboundMessage<'a> {
     thread_ts: Option<&'a str>,
 }
 
-impl ClawMaxChannel {
-    pub fn new(config: ClawMaxConfig) -> Self {
+impl BotMaxChannel {
+    pub fn new(config: BotMaxConfig) -> Self {
         let allow_all = config.allowed_senders.iter().any(|s| s == "*");
         Self {
             ws_url: config.ws_url.trim().to_string(),
@@ -80,7 +80,7 @@ impl ClawMaxChannel {
         if self.ws_url.starts_with("ws://") || self.ws_url.starts_with("wss://") {
             return Ok(());
         }
-        anyhow::bail!("ClawMax ws_url must start with ws:// or wss://")
+        anyhow::bail!("BotMax ws_url must start with ws:// or wss://")
     }
 
     fn is_sender_allowed(&self, sender: &str) -> bool {
@@ -140,7 +140,7 @@ impl ClawMaxChannel {
             .or_else(|| payload.get("from").and_then(|v| v.as_str()))?;
 
         if !self.is_sender_allowed(sender) {
-            tracing::warn!("ClawMax: ignoring message from unauthorized sender: {sender}");
+            tracing::warn!("BotMax: ignoring message from unauthorized sender: {sender}");
             return None;
         }
 
@@ -164,7 +164,7 @@ impl ClawMaxChannel {
             .and_then(|v| v.as_str())
             .or_else(|| payload.get("message_id").and_then(|v| v.as_str()))
             .map(|v| v.to_string())
-            .unwrap_or_else(|| format!("clawmax_{}", Uuid::new_v4()));
+            .unwrap_or_else(|| format!("botmax_{}", Uuid::new_v4()));
 
         let thread_ts = payload
             .get("thread_ts")
@@ -174,14 +174,14 @@ impl ClawMaxChannel {
         let raw_channel = payload
             .get("channel")
             .and_then(|v| v.as_str())
-            .unwrap_or("clawmax");
-        let channel = if raw_channel == "clawmax" {
-            "clawmax"
+            .unwrap_or("botmax");
+        let channel = if raw_channel == "botmax" {
+            "botmax"
         } else {
             tracing::warn!(
-                "ClawMax: inbound channel '{raw_channel}' does not match; defaulting to clawmax"
+                "BotMax: inbound channel '{raw_channel}' does not match; defaulting to botmax"
             );
-            "clawmax"
+            "botmax"
         };
 
         let timestamp = Self::parse_timestamp(payload.get("timestamp"))
@@ -203,8 +203,8 @@ impl ClawMaxChannel {
             frame_type: "message",
             direction: "out",
             message: OutboundMessage {
-                id: format!("clawmax_out_{}", Uuid::new_v4()),
-                channel: "clawmax",
+                id: format!("botmax_out_{}", Uuid::new_v4()),
+                channel: "botmax",
                 timestamp: Self::now_timestamp(),
                 content: message.content.as_str(),
                 recipient: message.recipient.as_str(),
@@ -227,35 +227,35 @@ impl ClawMaxChannel {
 }
 
 #[async_trait]
-impl Channel for ClawMaxChannel {
+impl Channel for BotMaxChannel {
     fn name(&self) -> &str {
-        "clawmax"
+        "botmax"
     }
 
     async fn send(&self, message: &SendMessage) -> anyhow::Result<()> {
         let sender = self
             .outbound_sender()
             .await
-            .ok_or_else(|| anyhow::anyhow!("ClawMax channel is not connected"))?;
+            .ok_or_else(|| anyhow::anyhow!("BotMax channel is not connected"))?;
 
         let frame = Self::build_outbound_frame(message)?;
         sender
             .send(frame)
             .await
-            .map_err(|e| anyhow::anyhow!("ClawMax outbound queue closed: {e}"))
+            .map_err(|e| anyhow::anyhow!("BotMax outbound queue closed: {e}"))
     }
 
     async fn listen(&self, tx: mpsc::Sender<ChannelMessage>) -> anyhow::Result<()> {
         self.validate_ws_url()?;
 
-        tracing::info!("ClawMax: connecting to {}", self.ws_url);
+        tracing::info!("BotMax: connecting to {}", self.ws_url);
         let (ws_stream, _) = tokio_tungstenite::connect_async(&self.ws_url).await?;
         let (mut write, mut read) = ws_stream.split();
 
         let (out_tx, mut out_rx) = mpsc::channel::<OutboundFrame>(64);
         self.set_outbound_sender(Some(out_tx)).await;
 
-        tracing::info!("ClawMax: connected and listening for messages...");
+        tracing::info!("BotMax: connected and listening for messages...");
 
         loop {
             tokio::select! {
@@ -265,7 +265,7 @@ impl Channel for ClawMaxChannel {
                             let value: serde_json::Value = match serde_json::from_str(&text) {
                                 Ok(v) => v,
                                 Err(err) => {
-                                    tracing::debug!("ClawMax: invalid JSON payload: {err}");
+                                    tracing::debug!("BotMax: invalid JSON payload: {err}");
                                     continue;
                                 }
                             };
@@ -277,7 +277,7 @@ impl Channel for ClawMaxChannel {
                                     "ts": Self::now_timestamp()
                                 });
                                 if let Err(err) = write.send(Message::Text(pong.to_string().into())).await {
-                                    tracing::warn!("ClawMax: failed to send pong: {err}");
+                                    tracing::warn!("BotMax: failed to send pong: {err}");
                                     break;
                                 }
                                 continue;
@@ -285,14 +285,14 @@ impl Channel for ClawMaxChannel {
 
                             if let Some(msg) = self.parse_inbound_value(&value) {
                                 if tx.send(msg).await.is_err() {
-                                    tracing::warn!("ClawMax: message channel closed");
+                                    tracing::warn!("BotMax: message channel closed");
                                     break;
                                 }
                             }
                         }
                         Some(Ok(Message::Ping(payload))) => {
                             if let Err(err) = write.send(Message::Pong(payload)).await {
-                                tracing::warn!("ClawMax: failed to reply to ping: {err}");
+                                tracing::warn!("BotMax: failed to reply to ping: {err}");
                                 break;
                             }
                         }
@@ -300,7 +300,7 @@ impl Channel for ClawMaxChannel {
                         Some(Ok(Message::Close(_))) => break,
                         Some(Ok(_)) => {}
                         Some(Err(err)) => {
-                            tracing::warn!("ClawMax WebSocket error: {err}");
+                            tracing::warn!("BotMax WebSocket error: {err}");
                             break;
                         }
                         None => break,
@@ -311,7 +311,7 @@ impl Channel for ClawMaxChannel {
                         Some(frame) => {
                             let OutboundFrame::Text(text) = frame;
                             if let Err(err) = write.send(Message::Text(text.into())).await {
-                                tracing::warn!("ClawMax: failed to send outbound frame: {err}");
+                                tracing::warn!("BotMax: failed to send outbound frame: {err}");
                                 break;
                             }
                         }
@@ -322,7 +322,7 @@ impl Channel for ClawMaxChannel {
         }
 
         self.set_outbound_sender(None).await;
-        anyhow::bail!("ClawMax WebSocket stream ended")
+        anyhow::bail!("BotMax WebSocket stream ended")
     }
 
     async fn health_check(&self) -> bool {
@@ -340,17 +340,17 @@ mod tests {
     #[test]
     fn test_config_defaults() {
         let toml_str = r#"ws_url = \"ws://127.0.0.1:9000/ws\""#;
-        let config: ClawMaxConfig = toml::from_str(toml_str).unwrap();
+        let config: BotMaxConfig = toml::from_str(toml_str).unwrap();
         assert!(config.allowed_senders.is_empty());
     }
 
     #[test]
     fn test_parse_inbound_defaults() {
-        let config = ClawMaxConfig {
+        let config = BotMaxConfig {
             ws_url: "ws://localhost:9000/ws".into(),
             allowed_senders: vec!["*".into()],
         };
-        let channel = ClawMaxChannel::new(config);
+        let channel = BotMaxChannel::new(config);
         let raw = serde_json::json!({
             "type": "message",
             "direction": "in",
@@ -362,7 +362,7 @@ mod tests {
         let msg = channel.parse_inbound_value(&raw).expect("message parsed");
         assert_eq!(msg.sender, "user_a");
         assert_eq!(msg.reply_target, "user_a");
-        assert_eq!(msg.channel, "clawmax");
+        assert_eq!(msg.channel, "botmax");
         assert_eq!(msg.content, "hello");
         assert!(!msg.id.is_empty());
         assert!(msg.timestamp > 0);
@@ -370,11 +370,11 @@ mod tests {
 
     #[test]
     fn test_parse_inbound_respects_allowlist() {
-        let config = ClawMaxConfig {
+        let config = BotMaxConfig {
             ws_url: "ws://localhost:9000/ws".into(),
             allowed_senders: vec!["user_a".into()],
         };
-        let channel = ClawMaxChannel::new(config);
+        let channel = BotMaxChannel::new(config);
         let raw = serde_json::json!({
             "type": "message",
             "direction": "in",

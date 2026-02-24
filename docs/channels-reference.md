@@ -117,7 +117,7 @@ If `[channels_config.matrix]`, `[channels_config.lark]`, or `[channels_config.fe
 | Feishu | websocket (default) or webhook | Webhook mode only |
 | DingTalk | stream mode | No |
 | QQ | bot gateway | No |
-| ClawMax | websocket | No |
+| BotMax | websocket | No |
 | Linq | webhook (`/linq`) | Yes (public HTTPS callback) |
 | iMessage | local integration | No |
 | Nostr | relay websocket (NIP-04 / NIP-17) | No |
@@ -137,7 +137,7 @@ Field names differ by channel:
 - `allowed_users` (Telegram/Discord/Slack/Mattermost/Matrix/IRC/Lark/Feishu/DingTalk/QQ/Nextcloud Talk)
 - `allowed_from` (Signal)
 - `allowed_numbers` (WhatsApp)
-- `allowed_senders` (Email/Linq/ClawMax)
+- `allowed_senders` (Email/Linq/BotMax)
 - `allowed_contacts` (iMessage)
 - `allowed_pubkeys` (Nostr)
 
@@ -428,10 +428,10 @@ Notes:
 allowed_contacts = ["*"]
 ```
 
-### 4.18 ClawMax (WebSocket)
+### 4.18 BotMax (WebSocket)
 
 ```toml
-[channels_config.clawmax]
+[channels_config.botmax]
 ws_url = "ws://127.0.0.1:9000/ws"
 allowed_senders = ["*"]
 ```
@@ -448,7 +448,7 @@ Inbound message (server → ZeroClaw):
     "reply_target": "zeroclaw_user",
     "content": "hello",
     "timestamp": 1700000000,
-    "channel": "clawmax",
+    "channel": "botmax",
     "thread_ts": null
   }
 }
@@ -461,8 +461,8 @@ Outbound message (ZeroClaw → server):
   "type": "message",
   "direction": "out",
   "message": {
-    "id": "clawmax_out_<uuid>",
-    "channel": "clawmax",
+    "id": "botmax_out_<uuid>",
+    "channel": "botmax",
     "timestamp": 1700000000,
     "content": "hello back",
     "recipient": "zeroclaw_user",
